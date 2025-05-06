@@ -1,7 +1,7 @@
 program=${args[program]}
 
 # Simple programs
-if [[ ${simple_software[@]} =~ "${program}" ]]; then
+if [[ " ${simple_software[*]} " == *" ${program} "* ]]; then
   install_dnf_package "${program}"
   return
 fi
