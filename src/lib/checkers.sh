@@ -11,6 +11,8 @@ simple_software=(
   bfs
   neovim
   yakuake
+  fd-find
+  ripgrep
 )
 
 check_dnf_package() {
