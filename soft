@@ -252,11 +252,34 @@ install_zoxide() {
 }
 
 install_lazygit() {
-  if $(check_dnf_package lazygit); then
+  if $(check_file "${HOME}/.local/bin/lazygit"); then
     echo "lazygit already installed"
   else
-    sudo dnf copr enable atim/lazygit -y
-    sudo dnf -y install lazygit
+    local latest_version compressed_file github_url
+    latest_version=$(curl -sLH 'Accept: application/json' https://github.com/jesseduffield/lazygit/releases/latest | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/')
+    compressed_file="lazygit_${latest_version//v/}_Linux_x86_64.tar.gz"
+    github_url="https://github.com/jesseduffield/lazygit/releases/download/${latest_version}/${compressed_file}"
+
+    curl -sSLo lazygit.tar.gz "$github_url"
+    tar xzf lazygit.tar.gz lazygit
+    install -Dm 755 lazygit -t "${HOME}/.local/bin"
+    rm lazygit lazygit.tar.gz
+  fi
+}
+
+install_lazydocker() {
+  if $(check_file "${HOME}/.local/bin/lazydocker"); then
+    echo "lazydocker already installed"
+  else
+    local latest_version compressed_file github_url
+    latest_version=$(curl -sLH 'Accept: application/json' https://github.com/jesseduffield/lazydocker/releases/latest | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/')
+    compressed_file="lazydocker_${latest_version//v/}_Linux_x86_64.tar.gz"
+    github_url="https://github.com/jesseduffield/lazydocker/releases/download/${latest_version}/${compressed_file}"
+
+    curl -sSLo lazydocker.tar.gz "$github_url"
+    tar xzf lazydocker.tar.gz lazydocker
+    install -Dm 755 lazydocker -t "${HOME}/.local/bin"
+    rm lazydocker lazydocker.tar.gz
   fi
 }
 
@@ -388,6 +411,7 @@ soft_install_command() {
   case "${program}" in
     zoxide|\
     lazygit|\
+    lazydocker|\
     code|\
     docker|\
     gh|\
@@ -415,6 +439,7 @@ soft_install_all_command() {
   # Custom software
   install_zoxide
   install_lazygit
+  install_lazydocker
   install_code
   install_docker
   install_gh

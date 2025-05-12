@@ -6,6 +6,7 @@ done
 # Custom software
 install_zoxide
 install_lazygit
+install_lazydocker
 install_code
 install_docker
 install_gh

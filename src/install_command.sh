@@ -10,6 +10,7 @@ fi
 case "${program}" in
   zoxide|\
   lazygit|\
+  lazydocker|\
   code|\
   docker|\
   gh|\
