@@ -51,7 +51,7 @@ install_code() {
     echo "code already installed"
   else
     sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
+    echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
     dnf check-update
     sudo dnf -y install code
   fi
@@ -61,11 +61,12 @@ install_docker() {
   if $(check_dnf_package docker-ce); then
     echo "docker already installed"
   else
-    sudo dnf -y install dnf-plugins-core
-    sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.rep
+    sudo dnf -y install dnf-plugins-core dnf5-plugins
+    sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
     sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    sudo usermod -aG docker $USER
+    sudo usermod -aG docker "$USER"
     newgrp docker
+    sudo systemctl enable --now docker
   fi
 }
 
@@ -73,7 +74,8 @@ install_gh() {
   if $(check_dnf_package gh); then
     echo "gh already installed"
   else
-    sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+    sudo dnf -y install dnf-plugins-core dnf5-plugins
+    sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo
     sudo dnf install gh --repo gh-cli
   fi
 }
