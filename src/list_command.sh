@@ -13,6 +13,7 @@ populate_checkers() {
     [code]="check_dnf_package"
     [docker-ce]="check_dnf_package"
     [zoxide]="check_file ${HOME}/.local/bin/zoxide"
+    [navi]="check_file ${HOME}/.local/bin/navi"
     [jetbrains-toolbox]="check_file ${HOME}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox"
   )
 

@@ -14,6 +14,7 @@ case "${program}" in
   code|\
   docker|\
   gh|\
+  navi|\
   jetbrains-toolbox)
     eval "install_${program}"
     ;;

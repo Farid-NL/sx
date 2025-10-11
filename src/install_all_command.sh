@@ -10,4 +10,5 @@ install_lazydocker
 install_code
 install_docker
 install_gh
+install_navi
 install_jetbrains-toolbox

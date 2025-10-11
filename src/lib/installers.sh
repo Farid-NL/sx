@@ -80,6 +80,14 @@ install_gh() {
   fi
 }
 
+install_navi() {
+  if $(check_file "${HOME}/.local/bin/navi"); then
+    echo "navi already installed"
+  else
+    BIN_DIR="$HOME/.local/bin" bash <(curl -sL https://raw.githubusercontent.com/denisidoro/navi/master/scripts/install)
+  fi
+}
+
 install_jetbrains-toolbox() {
   if $(check_file "${HOME}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox"); then
     echo "jetbrains-toolbox already installed"
