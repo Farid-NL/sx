@@ -341,12 +341,13 @@ install_eza() {
 }
 
 install_jetbrains-toolbox() {
-  if $(check_file "${HOME}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox"); then
+  if $(check_file '/opt/jetbrains-toolbox/bin/jetbrains-toolbox'); then
     echo "jetbrains-toolbox already installed"
   else
     wget -q --progress=bar:force:noscroll "https://data.services.jetbrains.com/products/download?platform=linux&code=TBA" -O /tmp/jetbrains-toolbox.tar.gz
-    tar -xf /tmp/jetbrains-toolbox.tar.gz -C ~/Downloads --strip-components=1
-    echo -e "\nAppimage extracted in ${HOME}/Downloads"
+    tar -xf /tmp/jetbrains-toolbox.tar.gz -C ~/Downloads
+    mv ~/Downloads/jetbrains-toolbox-* ~/Downloads/jetbrains-toolbox
+    sudo mv ~/Downloads/jetbrains-toolbox /opt
   fi
 }
 
