@@ -88,6 +88,22 @@ install_navi() {
   fi
 }
 
+install_eza() {
+  if $(check_file "${HOME}/.local/bin/eza"); then
+    echo "eza already installed"
+  else
+    local latest_version compressed_file github_url
+    latest_version=$(curl -sLH 'Accept: application/json' https://github.com/eza-community/eza/releases/latest | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/')
+    compressed_file="eza_x86_64-unknown-linux-gnu.tar.gz"
+    github_url="https://github.com/eza-community/eza/releases/download/${latest_version}/${compressed_file}"
+
+    curl -sSLo eza.tar.gz "$github_url"
+    tar xzf eza.tar.gz
+    install -Dm 755 eza -t "${HOME}/.local/bin"
+    rm eza eza.tar.gz
+  fi
+}
+
 install_jetbrains-toolbox() {
   if $(check_file "${HOME}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox"); then
     echo "jetbrains-toolbox already installed"

@@ -5,7 +5,6 @@ declare -a simple_software
 simple_software=(
   git
   fzf
-  eza
   git-delta
   bat
   bfs

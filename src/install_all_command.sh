@@ -11,4 +11,5 @@ install_code
 install_docker
 install_gh
 install_navi
+install_eza
 install_jetbrains-toolbox
