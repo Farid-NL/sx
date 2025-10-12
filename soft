@@ -239,7 +239,7 @@ install_dnf_package() {
   if $(check_dnf_package "$1"); then
     echo "$1 already installed"
   else
-    sudo dnf -y install "$1"
+    sudo dnf -y install --skip-unavailable "$1"
   fi
 }
 
