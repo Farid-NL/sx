@@ -12,6 +12,29 @@ install_dnf_package() {
   fi
 }
 
+# Helper to add DNF repositories
+# Usage: add_dnf_repo <repo_name> <source_url_or_content> [gpg_key_url]
+add_dnf_repo() {
+  local repo_name=$1
+  local source=$2
+  local gpg_key=$3
+
+  if [[ -n "$gpg_key" ]]; then
+    print_step "Importing GPG key for ${repo_name}..."
+    sudo rpm --import "$gpg_key" >> "$LOG_FILE" 2>&1
+  fi
+
+  print_step "Adding repository: ${repo_name}..."
+  if [[ "$source" == http* ]]; then
+    # It's a URL
+    sudo dnf -y install dnf-plugins-core dnf5-plugins >> "$LOG_FILE" 2>&1
+    sudo dnf config-manager addrepo --from-repofile="$source" >> "$LOG_FILE" 2>&1
+  else
+    # It's raw repo content
+    echo -e "$source" | sudo tee "/etc/yum.repos.d/${repo_name}.repo" > /dev/null 2>> "$LOG_FILE"
+  fi
+}
+
 # Helper to install binaries from GitHub releases
 # Usage: install_github_binary <repo> <binary_name> <asset_pattern>
 #
@@ -90,20 +113,9 @@ install_code() {
   if $(check_dnf_package code); then
     print_info "code already installed"
   else
-    print_step "Adding VS Code repository..."
-    {
-      sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-      echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo
-      dnf check-update || true
-    } >> "$LOG_FILE" 2>&1
-    
-    print_step "Installing VS Code..."
-    if sudo dnf -y install code >> "$LOG_FILE" 2>&1; then
-      print_success "VS Code installed successfully"
-    else
-      print_error "Failed to install VS Code. Check $LOG_FILE"
-      return 1
-    fi
+    local repo_content="[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc"
+    add_dnf_repo "vscode" "$repo_content" "https://packages.microsoft.com/keys/microsoft.asc"
+    install_dnf_package "code"
   fi
 }
 
@@ -111,21 +123,17 @@ install_docker() {
   if $(check_dnf_package docker-ce); then
     print_info "docker already installed"
   else
-    print_step "Installing Docker Engine..."
-    {
-      sudo dnf -y install dnf-plugins-core dnf5-plugins
-      sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
-      sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-      sudo usermod -aG docker "$USER"
-      sudo systemctl enable --now docker
-    } >> "$LOG_FILE" 2>&1
-    
-    if $(check_dnf_package docker-ce); then
+    add_dnf_repo "docker" "https://download.docker.com/linux/fedora/docker-ce.repo"
+
+    print_step "Installing Docker components..."
+    if sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >> "$LOG_FILE" 2>&1; then
+      sudo usermod -aG docker "$USER" >> "$LOG_FILE" 2>&1
+      sudo systemctl enable --now docker >> "$LOG_FILE" 2>&1
       print_success "Docker installed successfully"
       print_warning "To use docker without sudo RIGHT NOW, run this command manually:"
       printf "  ${COLOR_BOLD}newgrp docker${COLOR_RESTORE}\n"
     else
-      print_error "Failed to install Docker. Check $LOG_FILE"
+      print_error "Failed to install Docker components. Check $LOG_FILE"
       return 1
     fi
   fi
@@ -135,19 +143,8 @@ install_gh() {
   if $(check_dnf_package gh); then
     print_info "gh already installed"
   else
-    print_step "Adding GitHub CLI repository..."
-    {
-      sudo dnf -y install dnf-plugins-core dnf5-plugins
-      sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo
-    } >> "$LOG_FILE" 2>&1
-
-    print_step "Installing GitHub CLI..."
-    if sudo dnf install -y gh --repo gh-cli >> "$LOG_FILE" 2>&1; then
-      print_success "GitHub CLI installed successfully"
-    else
-      print_error "Failed to install GitHub CLI. Check $LOG_FILE"
-      return 1
-    fi
+    add_dnf_repo "gh-cli" "https://cli.github.com/packages/rpm/gh-cli.repo"
+    install_dnf_package "gh"
   fi
 }
 
@@ -182,9 +179,9 @@ install_jetbrains-toolbox() {
       sudo mkdir -p /opt/jetbrains-toolbox
       sudo mv ~/Downloads/jetbrains-toolbox_tmp/* /opt/jetbrains-toolbox/
     } >> "$LOG_FILE" 2>&1
-    
+
     rm -rf ~/Downloads/jetbrains-toolbox_tmp "$temp_tar"
-    
+
     if $(check_file '/opt/jetbrains-toolbox/bin/jetbrains-toolbox'); then
       print_success "JetBrains Toolbox installed in /opt/jetbrains-toolbox"
     else
