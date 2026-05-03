@@ -194,3 +194,14 @@ install_jetbrains-toolbox() {
 install_zellij() {
   install_github_binary "zellij-org/zellij" "zellij" "zellij-no-web-x86_64-unknown-linux-musl.tar.gz"
 }
+
+install_glow() {
+  if $(check_dnf_package glow); then
+    print_info "glow already installed"
+    return
+  fi
+
+  local repo_content="[charm]\nname=Charm\nbaseurl=https://repo.charm.sh/yum/\nenabled=1\ngpgcheck=1\ngpgkey=https://repo.charm.sh/yum/gpg.key"
+  add_dnf_repo "charm" "$repo_content" "https://repo.charm.sh/yum/gpg.key"
+  install_dnf_package "glow"
+}

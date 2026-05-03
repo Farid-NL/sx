@@ -20,6 +20,7 @@ populate_checkers() {
     [eza]="check_file ${HOME}/.local/bin/eza"
     [jetbrains-toolbox]="check_file /opt/jetbrains-toolbox/bin/jetbrains-toolbox"
     [zellij]="check_file ${HOME}/.local/bin/zellij"
+    [glow]="check_file ${HOME}/.local/bin/glow"
   )
 
   # Check if all software in custom_software is in software_checkers

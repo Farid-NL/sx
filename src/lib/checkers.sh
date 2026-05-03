@@ -26,6 +26,7 @@ custom_software=(
   eza
   jetbrains-toolbox
   zellij
+  glow
 )
 
 # Paths
