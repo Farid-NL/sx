@@ -4,12 +4,19 @@ for software in "${simple_software[@]}"; do
 done
 
 # Custom software
-install_zoxide
-install_lazygit
-install_lazydocker
-install_code
-install_docker
-install_gh
-install_navi
-install_eza
-install_jetbrains-toolbox
+custom_software=(
+  zoxide
+  lazygit
+  lazydocker
+  code
+  docker
+  gh
+  navi
+  eza
+  jetbrains-toolbox
+)
+
+for software in "${custom_software[@]}"; do
+  "install_${software}"
+done
+
