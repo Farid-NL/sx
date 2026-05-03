@@ -1,4 +1,5 @@
 validate_environment
+init_log
 
 print_header "Installing Standard Packages (DNF)"
 for software in "${simple_software[@]}"; do

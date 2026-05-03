@@ -3,8 +3,12 @@ install_dnf_package() {
     print_info "$1 already installed"
   else
     print_step "Installing $1 via DNF..."
-    sudo dnf -y install --skip-unavailable "$1"
-    print_success "$1 installed successfully"
+    if sudo dnf -y install --skip-unavailable "$1" >> "$LOG_FILE" 2>&1; then
+      print_success "$1 installed successfully"
+    else
+      print_error "Failed to install $1. Check $LOG_FILE for details."
+      return 1
+    fi
   fi
 }
 
@@ -39,18 +43,23 @@ install_github_binary() {
   temp_file=$(mktemp)
 
   print_step "Downloading ${bin_name} (${latest_version})..."
-  if curl -sSLo "$temp_file" "$github_url"; then
-    if [[ "$asset_name" == *.tar.gz ]]; then
-      tar xzf "$temp_file" "$bin_name" 2>/dev/null || tar xzf "$temp_file"
-      install -Dm 755 "$bin_name" -t "$target_dir"
-      rm -f "$bin_name"
-    else
-      install -Dm 755 "$temp_file" "${target_dir}/${bin_name}"
-    fi
+  if curl -sSLo "$temp_file" "$github_url" 2>> "$LOG_FILE"; then
+    print_step "Extracting ${bin_name}..."
+    {
+      if [[ "$asset_name" == *.tar.gz ]]; then
+        tar xzf "$temp_file" "$bin_name" 2>/dev/null || tar xzf "$temp_file"
+        install -Dm 755 "$bin_name" -t "$target_dir"
+        rm -f "$bin_name"
+      else
+        install -Dm 755 "$temp_file" "${target_dir}/${bin_name}"
+      fi
+    } >> "$LOG_FILE" 2>&1
+
     rm -f "$temp_file"
     print_success "${bin_name} installed successfully"
   else
-    print_error "Error downloading ${bin_name}"
+    print_error "Error downloading ${bin_name}. Check $LOG_FILE"
+    rm -f "$temp_file"
     return 1
   fi
 }
@@ -60,8 +69,12 @@ install_zoxide() {
     print_info "zoxide already installed"
   else
     print_step "Installing zoxide..."
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-    print_success "zoxide installed successfully"
+    if curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh >> "$LOG_FILE" 2>&1; then
+      print_success "zoxide installed successfully"
+    else
+      print_error "Failed to install zoxide. Check $LOG_FILE"
+      return 1
+    fi
   fi
 }
 
@@ -78,11 +91,19 @@ install_code() {
     print_info "code already installed"
   else
     print_step "Adding VS Code repository..."
-    sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
-    dnf check-update
-    sudo dnf -y install code
-    print_success "VS Code installed successfully"
+    {
+      sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+      echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo
+      dnf check-update || true
+    } >> "$LOG_FILE" 2>&1
+    
+    print_step "Installing VS Code..."
+    if sudo dnf -y install code >> "$LOG_FILE" 2>&1; then
+      print_success "VS Code installed successfully"
+    else
+      print_error "Failed to install VS Code. Check $LOG_FILE"
+      return 1
+    fi
   fi
 }
 
@@ -91,15 +112,22 @@ install_docker() {
     print_info "docker already installed"
   else
     print_step "Installing Docker Engine..."
-    sudo dnf -y install dnf-plugins-core dnf5-plugins
-    sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
-    sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    sudo usermod -aG docker "$USER"
-    sudo systemctl enable --now docker
-
-    print_success "Docker installed successfully"
-    print_warning "To use docker without sudo RIGHT NOW, run this command manually:"
-    printf "  ${COLOR_BOLD}newgrp docker${COLOR_RESTORE}\n"
+    {
+      sudo dnf -y install dnf-plugins-core dnf5-plugins
+      sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
+      sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo usermod -aG docker "$USER"
+      sudo systemctl enable --now docker
+    } >> "$LOG_FILE" 2>&1
+    
+    if $(check_dnf_package docker-ce); then
+      print_success "Docker installed successfully"
+      print_warning "To use docker without sudo RIGHT NOW, run this command manually:"
+      printf "  ${COLOR_BOLD}newgrp docker${COLOR_RESTORE}\n"
+    else
+      print_error "Failed to install Docker. Check $LOG_FILE"
+      return 1
+    fi
   fi
 }
 
@@ -107,11 +135,19 @@ install_gh() {
   if $(check_dnf_package gh); then
     print_info "gh already installed"
   else
+    print_step "Adding GitHub CLI repository..."
+    {
+      sudo dnf -y install dnf-plugins-core dnf5-plugins
+      sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo
+    } >> "$LOG_FILE" 2>&1
+
     print_step "Installing GitHub CLI..."
-    sudo dnf -y install dnf-plugins-core dnf5-plugins
-    sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo
-    sudo dnf install gh --repo gh-cli
-    print_success "GitHub CLI installed successfully"
+    if sudo dnf install -y gh --repo gh-cli >> "$LOG_FILE" 2>&1; then
+      print_success "GitHub CLI installed successfully"
+    else
+      print_error "Failed to install GitHub CLI. Check $LOG_FILE"
+      return 1
+    fi
   fi
 }
 
@@ -120,8 +156,12 @@ install_navi() {
     print_info "navi already installed"
   else
     print_step "Installing navi..."
-    BIN_DIR="$HOME/.local/bin" bash <(curl -sL https://raw.githubusercontent.com/denisidoro/navi/master/scripts/install)
-    print_success "navi installed successfully"
+    if BIN_DIR="$HOME/.local/bin" bash <(curl -sL https://raw.githubusercontent.com/denisidoro/navi/master/scripts/install) >> "$LOG_FILE" 2>&1; then
+      print_success "navi installed successfully"
+    else
+      print_error "Failed to install navi. Check $LOG_FILE"
+      return 1
+    fi
   fi
 }
 
@@ -135,12 +175,21 @@ install_jetbrains-toolbox() {
   else
     print_step "Downloading JetBrains Toolbox..."
     local temp_tar="/tmp/jetbrains-toolbox.tar.gz"
-    wget -q --progress=bar:force:noscroll "https://data.services.jetbrains.com/products/download?platform=linux&code=TBA" -O "$temp_tar"
-    mkdir -p ~/Downloads/jetbrains-toolbox_tmp
-    tar -xf "$temp_tar" -C ~/Downloads/jetbrains-toolbox_tmp --strip-components=1
-    sudo mkdir -p /opt/jetbrains-toolbox
-    sudo mv ~/Downloads/jetbrains-toolbox_tmp/* /opt/jetbrains-toolbox/
+    {
+      wget -q --progress=bar:force:noscroll "https://data.services.jetbrains.com/products/download?platform=linux&code=TBA" -O "$temp_tar"
+      mkdir -p ~/Downloads/jetbrains-toolbox_tmp
+      tar -xf "$temp_tar" -C ~/Downloads/jetbrains-toolbox_tmp --strip-components=1
+      sudo mkdir -p /opt/jetbrains-toolbox
+      sudo mv ~/Downloads/jetbrains-toolbox_tmp/* /opt/jetbrains-toolbox/
+    } >> "$LOG_FILE" 2>&1
+    
     rm -rf ~/Downloads/jetbrains-toolbox_tmp "$temp_tar"
-    print_success "JetBrains Toolbox installed in /opt/jetbrains-toolbox"
+    
+    if $(check_file '/opt/jetbrains-toolbox/bin/jetbrains-toolbox'); then
+      print_success "JetBrains Toolbox installed in /opt/jetbrains-toolbox"
+    else
+      print_error "Failed to install JetBrains Toolbox. Check $LOG_FILE"
+      return 1
+    fi
   fi
 }

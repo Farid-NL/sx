@@ -27,7 +27,15 @@ custom_software=(
   jetbrains-toolbox
 )
 
+# Paths
+LOG_FILE="/tmp/sx.log"
+
 # Initial validations
+init_log() {
+  echo "--- sx log start: $(date) ---" > "$LOG_FILE"
+  print_info "Logs are being saved to $LOG_FILE"
+}
+
 check_dependencies() {
   local dependencies=(curl wget tar dnf sed mktemp)
   local missing=()

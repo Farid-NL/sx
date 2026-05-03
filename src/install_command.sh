@@ -1,6 +1,7 @@
 program=${args[program]}
 
 validate_environment
+init_log
 
 print_header "Installing ${program}"
 
