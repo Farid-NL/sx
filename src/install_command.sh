@@ -1,5 +1,7 @@
 program=${args[program]}
 
+validate_environment
+
 print_header "Installing ${program}"
 
 # Check in simple software

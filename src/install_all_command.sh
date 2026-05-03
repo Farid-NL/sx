@@ -1,3 +1,5 @@
+validate_environment
+
 print_header "Installing Standard Packages (DNF)"
 for software in "${simple_software[@]}"; do
   install_dnf_package "${software}"
