@@ -234,6 +234,7 @@ custom_software=(
   navi
   eza
   jetbrains-toolbox
+  zellij
 )
 
 # Paths
@@ -527,6 +528,10 @@ install_jetbrains-toolbox() {
   fi
 }
 
+install_zellij() {
+  install_github_binary "zellij-org/zellij" "zellij" "zellij-no-web-x86_64-unknown-linux-musl.tar.gz"
+}
+
 # :command.command_functions
 # :command.function
 sx_list_command() {
@@ -552,6 +557,7 @@ sx_list_command() {
       [navi]="check_file ${HOME}/.local/bin/navi"
       [eza]="check_file ${HOME}/.local/bin/eza"
       [jetbrains-toolbox]="check_file /opt/jetbrains-toolbox/bin/jetbrains-toolbox"
+      [zellij]="check_file ${HOME}/.local/bin/zellij"
     )
 
     # Check if all software in custom_software is in software_checkers

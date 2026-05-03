@@ -190,3 +190,7 @@ install_jetbrains-toolbox() {
     fi
   fi
 }
+
+install_zellij() {
+  install_github_binary "zellij-org/zellij" "zellij" "zellij-no-web-x86_64-unknown-linux-musl.tar.gz"
+}

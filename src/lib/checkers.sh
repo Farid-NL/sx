@@ -25,6 +25,7 @@ custom_software=(
   navi
   eza
   jetbrains-toolbox
+  zellij
 )
 
 # Paths
