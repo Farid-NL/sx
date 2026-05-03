@@ -9,13 +9,15 @@ declare -A software_status
 
 populate_checkers() {
   software_checkers=(
-    [lazygit]="check_dnf_package"
+    [zoxide]="check_file ${HOME}/.local/bin/zoxide"
+    [lazygit]="check_file ${HOME}/.local/bin/lazygit"
+    [lazydocker]="check_file ${HOME}/.local/bin/lazydocker"
     [code]="check_dnf_package"
     [docker-ce]="check_dnf_package"
-    [zoxide]="check_file ${HOME}/.local/bin/zoxide"
+    [gh]="check_dnf_package"
     [navi]="check_file ${HOME}/.local/bin/navi"
     [eza]="check_file ${HOME}/.local/bin/eza"
-    [jetbrains-toolbox]="check_file ${HOME}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox"
+    [jetbrains-toolbox]="check_file /opt/jetbrains-toolbox/bin/jetbrains-toolbox"
   )
 
   # Add the 'simple software' to $software_checkers
