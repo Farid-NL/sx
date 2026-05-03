@@ -241,6 +241,8 @@ LOG_FILE="/tmp/sx.log"
 
 # Initial validations
 init_log() {
+  # Aseguramos que el log sea escribible si ya existe
+  touch "$LOG_FILE" 2>/dev/null || sudo rm -f "$LOG_FILE"
   echo "--- sx log start: $(date) ---" > "$LOG_FILE"
   print_info "Logs are being saved to $LOG_FILE"
 }
@@ -269,9 +271,12 @@ check_sudo() {
     exit 1
   fi
 
-  # Keep-alive: update existing sudo time stamp if set, otherwise do nothing.
-  # This prevents sudo from timing out during long installations.
-  while true; do sudo -n true; sleep 60; kill -0 $$ || exit; done 2>/dev/null &
+  # Keep-alive: update existing sudo time stamp every 60 seconds.
+  ( while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done ) 2>/dev/null &
+  SUDO_KEEPALIVE_PID=$!
+
+  # Ensure the keep-alive process is killed when the script exits
+  trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
 }
 
 validate_environment() {
