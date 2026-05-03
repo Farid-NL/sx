@@ -1,6 +1,6 @@
-# Soft - Software installer
+# sx - Software installer
 
-`soft` manages common software installation to all my Fedora machines
+`sx` manages common software installation to all my Fedora machines
 
 ---
 
@@ -13,19 +13,28 @@
 ## Usage
 
 ```shell
-soft install <arg>
+# List all sofware available to install
+sx ls
 ```
 
 ```shell
-soft ls
+# List all software available and their installation status
+sx ls -s
 ```
 
 ```shell
-soft ls -s
+# Install a specific software
+sx install <arg>
 ```
 
 ```shell
-soft install-all
+# Install all software
+sx install-all
+```
+
+```shell
+# Run remotely: bash ... [subcommand & flags]
+bash <(wget -qO - https://raw.githubusercontent.com/Farid-NL/soft/refs/heads/main/sx) install-all
 ```
 
 ## Adding a new program
@@ -92,7 +101,7 @@ simple_software=(
     ```shell
     alias bashly='docker run --rm -it --user $(id -u):$(id -g) --volume "$PWD:/app" dannyben/bashly'
     ```
-3. Run the following command to watch source changes and regenerate the main script `soft`
+3. Run the following command to watch source changes and regenerate the main script `sx`
     ```shell
     bashly generate -w
     ```
