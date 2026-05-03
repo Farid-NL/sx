@@ -43,7 +43,7 @@ bash <(wget -qO - https://raw.githubusercontent.com/Farid-NL/soft/refs/heads/mai
 
 > Programs that only need `sudo dnf -y <program-name>` command in order to be installed
 
-Add the program name in `$simple_software` located in `src/lib/checkers.sh`
+Add the program name to the `simple_software` array located in `src/lib/checkers.sh`.
 
 ```shell
 simple_software=(
@@ -54,43 +54,24 @@ simple_software=(
 
 ### Custom programs
 
-> Programs that need more steps in order to be installed
+> Programs that need more steps or custom logic (e.g., GitHub binaries) in order to be installed
 
-1. See what checker function (`src/lib/checkers.sh`) use the program to check its installation status
-2. Add a key-value pair in `$software_checkers` located in `src/list_command.sh`
+1. **Register the program**: Add the program name to the `custom_software` array in `src/lib/checkers.sh`.
+2. **Implement the installer**: Create a function named `install_<program-name>` in `src/lib/installers.sh`.
+    *   **Pro Tip**: Use the `install_github_binary` helper if the software is hosted on GitHub.
     ```shell
-    software_checkers=(
-      [new-program1]="check_dnf_package"
-      ...
-      [new-program2]="check_file ${HOME}/.local/bin/new-program2"
+    install_new-program() {
+      install_github_binary "author/repo" "bin-name" "asset-pattern_{{VERSION}}_Linux.tar.gz"
+    }
+    ```
+3. **Add status checker (Optional)**: If you want the program to show up correctly in `sx ls -s`, add its check rule in the `populate_checkers` function within `src/list_command.sh`.
+    ```shell
+    software_checkers+=(
+      [new-program]="check_file ${HOME}/.local/bin/new-program"
     )
     ```
-3. Add the commmands to install the program in a function named `install_<program-name>` in `src/lib/installers.sh`
-    ```shell
-    install_new-program1() {
-      # Commands
-    }
 
-    install_new-program2() {
-      # Commands
-    }
-    ```
-4. Add a case for the program in the switch statement located in `src/install_command.sh`
-    ```shell
-    # Custom programs
-    case "${program}" in
-      new-program1|\
-      new-program2|\
-      ...
-    esac
-    ```
-5. Add the function created in step 3 in the _Custom software_ section located in `src/install_all_command.sh`
-    ```shell
-    # Custom software
-    install_new-program1
-    install_new-program2
-    ...
-    ```
+*Note: You no longer need to update `install_command.sh` or `install_all_command.sh` manually, as they now handle the lists dynamically.*
 
 ## Development
 

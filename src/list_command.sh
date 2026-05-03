@@ -8,6 +8,7 @@ declare -A software_status
 
 
 populate_checkers() {
+  # Add the 'custom software' checkers manually as they have specific file paths
   software_checkers=(
     [zoxide]="check_file ${HOME}/.local/bin/zoxide"
     [lazygit]="check_file ${HOME}/.local/bin/lazygit"
@@ -20,7 +21,11 @@ populate_checkers() {
     [jetbrains-toolbox]="check_file /opt/jetbrains-toolbox/bin/jetbrains-toolbox"
   )
 
-  # Add the 'simple software' to $software_checkers
+  # Check if all software in custom_software is in software_checkers
+  # If not (and it's not a special case like docker/docker-ce), we could add it here
+  # For now, we keep the manual mapping for files and automatic for DNF
+  
+  # Add the 'simple software' to $software_checkers automatically
   for software in "${simple_software[@]}"; do
     software_checkers[$software]="check_dnf_package"
   done

@@ -14,6 +14,19 @@ simple_software=(
   ripgrep
 )
 
+# Programs that need custom installation logic
+custom_software=(
+  zoxide
+  lazygit
+  lazydocker
+  code
+  docker
+  gh
+  navi
+  eza
+  jetbrains-toolbox
+)
+
 check_dnf_package() {
   if dnf -C list --installed "$1" 2> /dev/null > /dev/null; then
     echo true

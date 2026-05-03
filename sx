@@ -223,6 +223,19 @@ simple_software=(
   ripgrep
 )
 
+# Programs that need custom installation logic
+custom_software=(
+  zoxide
+  lazygit
+  lazydocker
+  code
+  docker
+  gh
+  navi
+  eza
+  jetbrains-toolbox
+)
+
 check_dnf_package() {
   if dnf -C list --installed "$1" 2> /dev/null > /dev/null; then
     echo true
@@ -434,6 +447,7 @@ sx_list_command() {
   declare -A software_status
 
   populate_checkers() {
+    # Add the 'custom software' checkers manually as they have specific file paths
     software_checkers=(
       [zoxide]="check_file ${HOME}/.local/bin/zoxide"
       [lazygit]="check_file ${HOME}/.local/bin/lazygit"
@@ -446,7 +460,11 @@ sx_list_command() {
       [jetbrains-toolbox]="check_file /opt/jetbrains-toolbox/bin/jetbrains-toolbox"
     )
 
-    # Add the 'simple software' to $software_checkers
+    # Check if all software in custom_software is in software_checkers
+    # If not (and it's not a special case like docker/docker-ce), we could add it here
+    # For now, we keep the manual mapping for files and automatic for DNF
+
+    # Add the 'simple software' to $software_checkers automatically
     for software in "${simple_software[@]}"; do
       software_checkers[$software]="check_dnf_package"
     done
@@ -502,31 +520,20 @@ sx_install_command() {
 
   print_header "Installing ${program}"
 
-  # Simple programs
+  # Check in simple software
   if [[ " ${simple_software[*]} " == *" ${program} "* ]]; then
     install_dnf_package "${program}"
     return
   fi
 
-  # Custom programs
-  case "${program}" in
-    zoxide|\
-    lazygit|\
-    lazydocker|\
-    code|\
-    docker|\
-    gh|\
-    navi|\
-    eza|\
-    jetbrains-toolbox)
-      eval "install_${program}"
-      ;;
+  # Check in custom software
+  if [[ " ${custom_software[*]} " == *" ${program} "* ]]; then
+    "install_${program}"
+    return
+  fi
 
-    *)
-      echo "Program not in the list" >&2
-      exit 1
-      ;;
-  esac
+  print_error "Program '${program}' not found in the list."
+  exit 1
 
 }
 
@@ -538,19 +545,6 @@ sx_install_all_command() {
   for software in "${simple_software[@]}"; do
     install_dnf_package "${software}"
   done
-
-  # Custom software
-  custom_software=(
-    zoxide
-    lazygit
-    lazydocker
-    code
-    docker
-    gh
-    navi
-    eza
-    jetbrains-toolbox
-  )
 
   print_header "Installing Custom Packages"
   for software in "${custom_software[@]}"; do
