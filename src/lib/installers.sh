@@ -118,9 +118,12 @@ install_jetbrains-toolbox() {
   if $(check_file '/opt/jetbrains-toolbox/bin/jetbrains-toolbox'); then
     echo "jetbrains-toolbox already installed"
   else
-    wget -q --progress=bar:force:noscroll "https://data.services.jetbrains.com/products/download?platform=linux&code=TBA" -O /tmp/jetbrains-toolbox.tar.gz
-    tar -xf /tmp/jetbrains-toolbox.tar.gz -C ~/Downloads
-    mv ~/Downloads/jetbrains-toolbox-* ~/Downloads/jetbrains-toolbox
-    sudo mv ~/Downloads/jetbrains-toolbox /opt
+    local temp_tar="/tmp/jetbrains-toolbox.tar.gz"
+    wget -q --progress=bar:force:noscroll "https://data.services.jetbrains.com/products/download?platform=linux&code=TBA" -O "$temp_tar"
+    mkdir -p ~/Downloads/jetbrains-toolbox_tmp
+    tar -xf "$temp_tar" -C ~/Downloads/jetbrains-toolbox_tmp --strip-components=1
+    sudo mkdir -p /opt/jetbrains-toolbox
+    sudo mv ~/Downloads/jetbrains-toolbox_tmp/* /opt/jetbrains-toolbox/
+    rm -rf ~/Downloads/jetbrains-toolbox_tmp "$temp_tar"
   fi
 }
