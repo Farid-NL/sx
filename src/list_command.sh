@@ -62,6 +62,6 @@ else
   populate_checkers
 
   for software in "${!software_checkers[@]}"; do
-    echo "${software}"
+    print_info "${software}"
   done
 fi

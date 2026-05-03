@@ -1,5 +1,7 @@
 program=${args[program]}
 
+print_header "Installing ${program}"
+
 # Simple programs
 if [[ " ${simple_software[*]} " == *" ${program} "* ]]; then
   install_dnf_package "${program}"
