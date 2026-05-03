@@ -357,6 +357,12 @@ add_dnf_repo() {
   local source=$2
   local gpg_key=$3
 
+  # Check if repository already exists (by file or by dnf id)
+  if [[ -f "/etc/yum.repos.d/${repo_name}.repo" ]] || dnf repolist --enabled 2>/dev/null | grep -q "^${repo_name}"; then
+    print_info "Repository ${repo_name} already exists, skipping..."
+    return
+  fi
+
   if [[ -n "$gpg_key" ]]; then
     print_step "Importing GPG key for ${repo_name}..."
     sudo rpm --import "$gpg_key" >> "$LOG_FILE" 2>&1
