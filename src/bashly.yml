@@ -1,4 +1,4 @@
-name: soft
+name: sx
 help: Personal Fedora installer
 version: 1.0.0
 
@@ -23,6 +23,6 @@ commands:
     help: Install all programs
 
 examples:
-  - soft ls
-  - soft install yakuake
-  - soft install-all
+  - sx ls
+  - sx install yakuake
+  - sx install-all
