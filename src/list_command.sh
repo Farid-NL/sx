@@ -20,7 +20,8 @@ populate_checkers() {
     [eza]="check_file ${HOME}/.local/bin/eza"
     [jetbrains-toolbox]="check_file /opt/jetbrains-toolbox/bin/jetbrains-toolbox"
     [zellij]="check_file ${HOME}/.local/bin/zellij"
-    [glow]="check_file ${HOME}/.local/bin/glow"
+    [glow]="check_dnf_package"
+    [brave-browser]="check_dnf_package"
   )
 
   # Check if all software in custom_software is in software_checkers

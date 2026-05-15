@@ -211,3 +211,13 @@ install_glow() {
   add_dnf_repo "charm" "$repo_content" "https://repo.charm.sh/yum/gpg.key"
   install_dnf_package "glow"
 }
+
+install_brave-browser() {
+  if $(check_dnf_package brave-browser); then
+    print_info "brave-browser already installed"
+    return
+  fi
+
+  add_dnf_repo "brave-browser" "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
+  install_dnf_package "brave-browser"
+}

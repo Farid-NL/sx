@@ -236,6 +236,7 @@ custom_software=(
   jetbrains-toolbox
   zellij
   glow
+  brave-browser
 )
 
 # Paths
@@ -550,6 +551,16 @@ install_glow() {
   install_dnf_package "glow"
 }
 
+install_brave-browser() {
+  if $(check_dnf_package brave-browser); then
+    print_info "brave-browser already installed"
+    return
+  fi
+
+  add_dnf_repo "brave-browser" "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
+  install_dnf_package "brave-browser"
+}
+
 # :command.command_functions
 # :command.function
 sx_list_command() {
@@ -576,7 +587,8 @@ sx_list_command() {
       [eza]="check_file ${HOME}/.local/bin/eza"
       [jetbrains-toolbox]="check_file /opt/jetbrains-toolbox/bin/jetbrains-toolbox"
       [zellij]="check_file ${HOME}/.local/bin/zellij"
-      [glow]="check_file ${HOME}/.local/bin/glow"
+      [glow]="check_dnf_package"
+      [brave-browser]="check_dnf_package"
     )
 
     # Check if all software in custom_software is in software_checkers

@@ -27,6 +27,7 @@ custom_software=(
   jetbrains-toolbox
   zellij
   glow
+  brave-browser
 )
 
 # Paths
