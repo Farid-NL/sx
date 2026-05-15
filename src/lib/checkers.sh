@@ -28,6 +28,7 @@ custom_software=(
   zellij
   glow
   brave-browser
+  vicinae
 )
 
 # Paths

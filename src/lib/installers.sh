@@ -35,6 +35,10 @@ add_dnf_repo() {
     # It's a URL
     sudo dnf -y install dnf-plugins-core dnf5-plugins >> "$LOG_FILE" 2>&1
     sudo dnf config-manager addrepo --from-repofile="$source" >> "$LOG_FILE" 2>&1
+  elif [[ "$source" == copr:* ]]; then
+    local copr_spec="${source#copr:}"
+    sudo dnf -y install dnf-plugins-core dnf5-plugins >> "$LOG_FILE" 2>&1
+    sudo dnf -y copr enable "${copr_spec}" >> "$LOG_FILE" 2>&1
   else
     # It's raw repo content
     echo -e "$source" | sudo tee "/etc/yum.repos.d/${repo_name}.repo" > /dev/null 2>> "$LOG_FILE"
@@ -220,4 +224,25 @@ install_brave-browser() {
 
   add_dnf_repo "brave-browser" "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
   install_dnf_package "brave-browser"
+}
+
+install_vicinae() {
+  if $(check_dnf_package vicinae); then
+    print_info "vicinae already installed"
+    return
+  fi
+
+  add_dnf_repo "vicinae" "copr:quadratech188/vicinae"
+  install_dnf_package "vicinae"
+
+  local browser_integration_file="/etc/chromium/native-messaging-hosts/com.vicinae.vicinae.json"
+  local brave_integration_file="${HOME}/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.vicinae.vicinae.json"
+
+  if $(check_file "${brave_integration_file}"); then
+    echo "     🔹 browser integration already installed"
+  else
+    sudo cp "${browser_integration_file}" "${brave_integration_file}" >> "$LOG_FILE" 2>&1
+    sudo chown "$USER":"$USER" "${brave_integration_file}" >> "$LOG_FILE" 2>&1
+    echo "     ✅ browser integration installed"
+  fi
 }

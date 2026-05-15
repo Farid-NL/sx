@@ -22,6 +22,7 @@ populate_checkers() {
     [zellij]="check_file ${HOME}/.local/bin/zellij"
     [glow]="check_dnf_package"
     [brave-browser]="check_dnf_package"
+    [vicinae]="check_dnf_package"
   )
 
   # Check if all software in custom_software is in software_checkers
